@@ -1,0 +1,1 @@
+export const SEARCH_RESULT_VIEW_TYPE = "search-result-view"
