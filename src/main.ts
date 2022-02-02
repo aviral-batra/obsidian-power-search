@@ -13,13 +13,10 @@ export default class PowerSearch extends Plugin {
 	async onload() {
 		console.log("Power Search plugin loading")
 		await this.loadSettings();
-		console.log(this.app)
-
 		this.registerView(
 			SEARCH_RESULT_VIEW_TYPE,
 			(leaf) => (this.view = new SearchResultView(leaf, this))
 		);
-
 
 		this.app.workspace.onLayoutReady(() => this.initPlugin());
 	}
@@ -29,14 +26,23 @@ export default class PowerSearch extends Plugin {
 		this.addSettingTab(new PowerSearchSettingsTab(this.app, this));
 		this.initLeaf();
 		this.addCommands()
+		this.registerEvents()
 	}
 
 	addCommands() {
 		this.addCommand({
-			id: 'power-search-search-selection',
-			name: 'Search Selection',
-			callback: () => this.search.searchSelection()
-		});
+			id: "open-power-search-results-view",
+			name: "Open View",
+			callback: () => this.initLeaf()
+		})
+	}
+
+	registerEvents() {
+		// when text is selected, it is searched
+		this.registerDomEvent(document, "selectionchange", () => {this.search.debouncedSearch(document.getSelection().toString())})
+		// while typing, the text is searched
+		this.registerDomEvent(document, "keydown", () => this.search.debouncedSearchCurrent(true)) // TODO customise search block vs line
+		// this.registerObsidianProtocolHandler("open" => ) TODO if view not open in sidebar, open protocols in new pane
 	}
 
 	onunload() {

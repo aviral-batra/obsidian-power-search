@@ -1,56 +1,101 @@
-import * as fuzzysort from "fuzzysort";
+import { Index } from "flexsearch";
 import { debounce, MarkdownView } from "obsidian";
 import { IncomingAnkiConnectNote, invoke } from "./anki";
 import PowerSearch from "./main";
 import { stripHTML } from "./utils";
-
+import { stemmer } from "stemmer"
+import { cursorTo } from "readline";
 
 export class FuzzySearcher {
     plugin: PowerSearch
-    index: { preparedFields: Fuzzysort.Prepared; note: IncomingAnkiConnectNote; }[]
-    results: string[]
-    debouncedRefreshIndex: Function;
+    index: Index
+    results: {query: string, res: [note: IncomingAnkiConnectNote, fldText: string][]}
+    notes: [note: IncomingAnkiConnectNote, fldText: string][]
+
+    _index_updating: boolean;
 
     constructor(plugin: PowerSearch) {
         this.plugin = plugin
-        this.debouncedRefreshIndex = debounce(this.refreshIndex, 4000)
+        this.index = new Index({
+            stemmer: stemmer,
+            // TODO add matcher
+            // TODO add custom stop word filter
+        })
+        // create the index
+        this.updateIndex(false)
     }
 
-    searchSelection() {
-        this.results = []
+    debouncedRefreshIndex = debounce(this.updateIndex) // TODO make timeout customisable
+    debouncedSearch = debounce((query: string) => this.search(query), 1000)
+    debouncedSearchCurrent = debounce((block: boolean) => {
         let editor = this.plugin.app.workspace.getActiveViewOfType(MarkdownView).editor
-        if (editor.somethingSelected()) {
-            this.search(editor.getSelection())
-        } else {
-            this.results.push("No selections made")
+        if (block) { // TODO this is clunky? find another way
+            let query: string = ""
+            let origLineNo = editor.getCursor().line 
+            let lineCount = editor.lineCount()
+            let lineNo = origLineNo
+            let line = editor.getLine(lineNo)
+            // get lines before cursor and add them to start of query
+            while (line.length != 0) {
+                line = editor.getLine(lineNo)
+                if (line) query = line + ` ${query}`
+                if (lineNo == 0) break
+                lineNo -= 1
+            }
+            
+            // get lines after cursor and add them to end of query
+            lineNo = origLineNo + 1
+            line = editor.getLine(lineNo)
+            while (line) {
+                line = editor.getLine(lineNo)
+                if (line) query += ` ${line}`
+                if (lineNo == (lineCount - 1)) break
+                lineNo += 1
+            }
+            console.log(query)
+            this.search(query)
         }
-    }
+        else this.search(editor.getLine(editor.getCursor().line))
+    }, 1000)
 
     async search(query: string) {
-        if (!this.index) this.index = await this.refreshIndex()
-        else this.debouncedRefreshIndex() 
-        let targets = this.index.map(i => i.preparedFields)
-        let fsoptions: Fuzzysort.Options = {
-            limit: 100,
-            threshold: -10000
-        }
+        if (!this._index_updating) this.debouncedRefreshIndex()
+        this.results = {query: query, res: []}
+        if (!query) return 
         // TODO customise options in settings
-        let rs = await fuzzysort.goAsync(query, targets, fsoptions)
-        if (rs.length) this.results = rs.map(r => fuzzysort.highlight(r))
-        else this.results.push("No results found")
+        let rs = this.index.search(query, {
+            suggest: true,
+        })
+        if (!rs.length) {} // TODO this.results.push("No results found")
+        else {
+            this.results.res = rs.map(r => this.notes.filter(n => n[0].noteId == r)[0])
+            // TODO highlighting
+            // let queryWords = [...new Set(query.split(" ").map(w => stemmer(w)))]
+            // this.results.res.forEach(r => {queryWords.forEach(qw => r[1] = this.highlight(r[1], qw))})
+        }
         this.plugin.view.redraw()
     }
 
-    async refreshIndex() {
-        let notes = await this.getNotes()
-        return notes.map(n => {
+    async updateIndex(update: boolean = true) {
+        this._index_updating = true
+        let ns: IncomingAnkiConnectNote[] = await this.getNotes()
+        this.notes = ns.map(n => {
             let fieldsText: string = ""
             for (let field in n.fields) {
-                fieldsText += `${stripHTML(n.fields[field].value)} | `
+                fieldsText += `${n.fields[field].value} |`
             }
-            return { preparedFields: fuzzysort.prepare(fieldsText), note: n }
+            return [n, fieldsText]
         })
+        if (update) this.notes.forEach(n => this.index.add(n[0].noteId, stripHTML(n[1])))
+        else this.notes.forEach(n => this.index.update(n[0].noteId, stripHTML(n[1])))
+        this._index_updating = false
     }
+
+    // highlight(content: string, keyword: string) {
+    //     const sanitizedKeyword = keyword.replace(/\W/g, '');
+    //     const regexForContent = new RegExp(sanitizedKeyword, 'gi');
+    //     return content.replace(regexForContent, '<span class="highlight">$&</span>');
+    // }
 
     async getNotes(): Promise<IncomingAnkiConnectNote[]> {
         let ids: number[] = await invoke("findNotes", {query: "deck:*"})
