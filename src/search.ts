@@ -42,7 +42,7 @@ export class FuzzySearcher {
                 if (lineNo == 0) break
                 lineNo -= 1
             }
-            
+
             // get lines after cursor and add them to end of query
             lineNo = origLineNo + 1
             line = editor.getLine(lineNo)
@@ -52,7 +52,6 @@ export class FuzzySearcher {
                 if (lineNo == (lineCount - 1)) break
                 lineNo += 1
             }
-            console.log(query)
             this.search(query)
         }
         else this.search(editor.getLine(editor.getCursor().line))
