@@ -30,7 +30,9 @@ Obsidian search is a plugin that allows you to search your notes while you are t
 5. Run the plugin with anki running in the background
 6. See your search results appear in the search pane! (can be reopened with an obsidian command)
 
-### 
+### Obsidian notes
+
+TODO (but automatic setup so no need)
 
 ## Setup for external indexes
 
@@ -55,6 +57,7 @@ TODO
 ## TODO 
 
 - add search query history to undo search history
+- options to turn certain indexes on and off in the plugin settings
 - pin searches
 - paginate results and allow page limit configuration
 - deal with cannot connect to anki errors
