@@ -4,7 +4,6 @@ import { IncomingAnkiConnectNote, invoke } from "./anki";
 import PowerSearch from "./main";
 import { stripHTML } from "./utils";
 import { stemmer } from "stemmer"
-import { cursorTo } from "readline";
 
 export class FuzzySearcher {
     plugin: PowerSearch
@@ -30,8 +29,6 @@ export class FuzzySearcher {
         this.updateIndex(false)
     }
 
-    
-
     async search(query: string) {
         if (!this._index_updating) this.debouncedRefreshIndex()
         this.results = {query: query, res: []}
@@ -40,14 +37,14 @@ export class FuzzySearcher {
         let rs = this.index.search(query, {
             suggest: true,
         })
-        if (!rs.length) {} // TODO this.results.push("No results found")
+        if (!(rs || rs.length)) {} // TODO this.results.push("No results found")
         else {
             this.results.res = rs.map(r => this.notes.filter(n => n[0].noteId == r)[0])
             // TODO highlighting
             // let queryWords = [...new Set(query.split(" ").map(w => stemmer(w)))]
             // this.results.res.forEach(r => {queryWords.forEach(qw => r[1] = this.highlight(r[1], qw))})
         }
-        this.plugin.view.redraw()
+        await this.plugin.view.redraw()
     }
 
     async updateIndex(update: boolean = true) {

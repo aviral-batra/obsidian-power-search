@@ -42,7 +42,7 @@ export class PowerSearchSettingsTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 		.setName('Refresh after time')
-		.setDesc('This is the time after you stop searching that the index refreshes i.e. note changes + new notes + note deletions are loaded from anki into the index')
+		.setDesc('This is the time after you stop searching that the index refreshes i.e. note changes + new notes + note deletions are loaded from anki into the index (debounce timeout)')
 		.addSlider(slider => slider
 			.setLimits(500, 5000, 100)
 			.setValue(this.plugin.settings.refreshDebounce)

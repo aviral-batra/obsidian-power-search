@@ -1,8 +1,9 @@
 # Obsidian Power Search
 
 Obsidian search is a plugin that allows you to search your notes while you are typing in obsidian (currently limited to only searching anki notes). This has a few benefits:
-- helps you to better link your ideas
+- helps you to better link your ideas as you can link similar information when you see similar note text
 - helps prevent redundancy as you can see where you have written something else before
+- easier maintainence of notes as you can update them whenever you see something you want to change
 
 ## Setup for built in indexes
 
@@ -68,10 +69,10 @@ TODO
 - have stripped and highlighted section as toggle and then the original html as the expand content under the toggle
 - allow typos?
 - Allow selection of search results themselves to search for more notes (see other siac functionality)
-- fix image error console and in cards
+- fix image error console
 - make general index creator accessible by api to allow others to add their own searchable content to the index
 - anki css for notes (override plugin css? + make this an option?)
 - use svelte components?
 - integration with obsidian to anki? i.e. find the note using the id (not necessary due to obsidian link?)
 - refresh index command? + option to not debounced refresh index on each search 
-- render maths eqns
+- set min search debounce timeout to be equal to an arbitrary large search + rendering time rounded up to the nearest hundred + 100 so that another search is not started while the previous one is being rendered/add a variable which states the search is still going on and don't let a new search start if this variable is true

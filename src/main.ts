@@ -62,7 +62,7 @@ export default class PowerSearch extends Plugin {
 		let leaves = this.app.workspace.getLeavesOfType(SEARCH_RESULT_VIEW_TYPE)
 		if (leaves.length) {
 		} else {
-		  	this.app.workspace.getRightLeaf(true).setViewState({
+		  	this.app.workspace.getRightLeaf(false).setViewState({
 			type: SEARCH_RESULT_VIEW_TYPE,
 			active: true,
 		  });
