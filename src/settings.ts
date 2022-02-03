@@ -3,10 +3,12 @@ import PowerSearch from "./main";
 
 export interface PowerSearchSettings {
 	searchDebounce: number;
+	refreshDebounce: number;
 }
 
 export const DEFAULT_SETTINGS: PowerSearchSettings = {
-	searchDebounce: 1000
+	searchDebounce: 1000,
+	refreshDebounce: 2000
 }
 
 
@@ -37,5 +39,18 @@ export class PowerSearchSettingsTab extends PluginSettingTab {
 					await this.plugin.saveSettings();
 					this.plugin.search.refreshDebounces()
 				}));
+
+		new Setting(containerEl)
+		.setName('Refresh after time')
+		.setDesc('This is the time after you stop searching that the index refreshes i.e. note changes + new notes + note deletions are loaded from anki into the index')
+		.addSlider(slider => slider
+			.setLimits(500, 5000, 100)
+			.setValue(this.plugin.settings.refreshDebounce)
+			.setDynamicTooltip()
+			.onChange(async (value) => {
+				this.plugin.settings.refreshDebounce = value;
+				await this.plugin.saveSettings();
+				this.plugin.search.refreshDebounces()
+			}));
 	}
 }

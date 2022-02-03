@@ -108,8 +108,8 @@ export class FuzzySearcher {
     }
 
     refreshDebounces() {
-        this.debouncedRefreshIndex = debounce(this.updateIndex) 
-        this.debouncedSearch = debounce((query: string) => this.search(query))
+        this.debouncedRefreshIndex = debounce(this.updateIndex, this.plugin.settings.refreshDebounce) 
+        this.debouncedSearch = debounce((query: string) => this.search(query), this.plugin.settings.searchDebounce)
         this.debouncedSearchCurrent = debounce((block: boolean) => this._searchCurrent(block), this.plugin.settings.searchDebounce)
     }
 
