@@ -12,10 +12,15 @@ export class FuzzySearcher {
     results: {query: string, res: [note: IncomingAnkiConnectNote, fldText: string][]}
     notes: [note: IncomingAnkiConnectNote, fldText: string][]
 
+    debouncedRefreshIndex: Function
+    debouncedSearch: Function
+    debouncedSearchCurrent: Function
+
     _index_updating: boolean;
 
     constructor(plugin: PowerSearch) {
         this.plugin = plugin
+        this.refreshDebounces()
         this.index = new Index({
             stemmer: stemmer,
             // TODO add matcher
@@ -25,37 +30,7 @@ export class FuzzySearcher {
         this.updateIndex(false)
     }
 
-    debouncedRefreshIndex = debounce(this.updateIndex) // TODO make timeout customisable
-    debouncedSearch = debounce((query: string) => this.search(query), 1000)
-    debouncedSearchCurrent = debounce((block: boolean) => {
-        let editor = this.plugin.app.workspace.getActiveViewOfType(MarkdownView).editor
-        if (block) { // TODO this is clunky? find another way
-            let query: string = ""
-            let origLineNo = editor.getCursor().line 
-            let lineCount = editor.lineCount()
-            let lineNo = origLineNo
-            let line = editor.getLine(lineNo)
-            // get lines before cursor and add them to start of query
-            while (line.length != 0) {
-                line = editor.getLine(lineNo)
-                if (line) query = line + ` ${query}`
-                if (lineNo == 0) break
-                lineNo -= 1
-            }
-
-            // get lines after cursor and add them to end of query
-            lineNo = origLineNo + 1
-            line = editor.getLine(lineNo)
-            while (line) {
-                line = editor.getLine(lineNo)
-                if (line) query += ` ${line}`
-                if (lineNo == (lineCount - 1)) break
-                lineNo += 1
-            }
-            this.search(query)
-        }
-        else this.search(editor.getLine(editor.getCursor().line))
-    }, 1000)
+    
 
     async search(query: string) {
         if (!this._index_updating) this.debouncedRefreshIndex()
@@ -90,6 +65,36 @@ export class FuzzySearcher {
         this._index_updating = false
     }
 
+    _searchCurrent(block: boolean) {
+        let editor = this.plugin.app.workspace.getActiveViewOfType(MarkdownView).editor
+        if (block) { // TODO this is clunky? find another way
+            let query: string = ""
+            let origLineNo = editor.getCursor().line 
+            let lineCount = editor.lineCount()
+            let lineNo = origLineNo
+            let line = editor.getLine(lineNo)
+            // get lines before cursor and add them to start of query
+            while (line.length != 0) {
+                line = editor.getLine(lineNo)
+                if (line) query = line + ` ${query}`
+                if (lineNo == 0) break
+                lineNo -= 1
+            }
+
+            // get lines after cursor and add them to end of query
+            lineNo = origLineNo + 1
+            line = editor.getLine(lineNo)
+            while (line) {
+                line = editor.getLine(lineNo)
+                if (line) query += ` ${line}`
+                if (lineNo == (lineCount - 1)) break
+                lineNo += 1
+            }
+            this.search(query)
+        }
+        else this.search(editor.getLine(editor.getCursor().line))
+    }
+
     // highlight(content: string, keyword: string) {
     //     const sanitizedKeyword = keyword.replace(/\W/g, '');
     //     const regexForContent = new RegExp(sanitizedKeyword, 'gi');
@@ -100,6 +105,12 @@ export class FuzzySearcher {
         let ids: number[] = await invoke("findNotes", {query: "deck:*"})
         let notes: IncomingAnkiConnectNote[] = await invoke("notesInfo", {notes: ids})
         return notes
+    }
+
+    refreshDebounces() {
+        this.debouncedRefreshIndex = debounce(this.updateIndex) 
+        this.debouncedSearch = debounce((query: string) => this.search(query))
+        this.debouncedSearchCurrent = debounce((block: boolean) => this._searchCurrent(block), this.plugin.settings.searchDebounce)
     }
 
 }
