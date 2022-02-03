@@ -30,7 +30,7 @@ Obsidian search is a plugin that allows you to search your notes while you are w
 
 ## Use 
 
-Obsidian power search is an automatic plugin - you don't have to do any setup, just configure and go! While you are typing, it will search your anki notes (more searchable content types added to the index in the future, including custom types) for the line or block of text you are writing (surrounded by whitespace) and provide the best results. There is an obsidian command to reopen the search result pane if it is ever closed.
+Obsidian power search is an automatic plugin - you don't have to activate the search in any way, just configure and go! While you are typing, it will search your anki notes (more searchable content types added to the index in the future, including custom types) for the line or block of text you are writing (surrounded by whitespace) and provide the best results. There is an obsidian command to reopen the search result pane if it is ever closed.
 
 ## Config
 
