@@ -2,11 +2,15 @@
     height: auto
 }
 
-.highlight {
+
+/* TODO */
+
+
+/* .highlight {
     background-color: rgb(144, 144, 255);
 }
 
-.power-search-toolbar {}
+.power-search-toolbar {} */
 
 .power-search-results-children {
     overflow: scroll;
