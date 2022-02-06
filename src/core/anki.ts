@@ -4,8 +4,9 @@ import { FuzzySearcher } from "src/search"
 import { stripHTML } from "src/utils"
 
 export class AnkiIndex extends SearchIndex {
+
     constructor(searcher: FuzzySearcher) {
-        super(searcher, "Anki Note") 
+        super(searcher, "Anki Note")
     }
 
     async getOriginalNotes(): Promise<IncomingAnkiConnectNote[]> {

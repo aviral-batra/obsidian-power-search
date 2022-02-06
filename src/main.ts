@@ -1,4 +1,5 @@
 import { Plugin } from 'obsidian';
+import { SearchIndex } from 'src';
 import { SEARCH_RESULT_VIEW_TYPE } from './constants';
 import { AnkiIndex } from './core/anki';
 import { ObsidianIndex } from './core/obs';
@@ -10,10 +11,12 @@ import { SearchResultView } from './view';
 export default class PowerSearch extends Plugin {
 	settings: PowerSearchSettings;
 	search: FuzzySearcher;
+	_idxForSettings: SearchIndex[]
 
 	async onload() {
 		console.log("Power Search plugin loading")
 		await this.loadSettings();
+		this._idxForSettings = []
 		this.registerView(
 			SEARCH_RESULT_VIEW_TYPE,
 			(leaf) => (new SearchResultView(leaf, this))
@@ -24,15 +27,17 @@ export default class PowerSearch extends Plugin {
 
 	initPlugin() {
 		this.search = new FuzzySearcher(this)
+
+		// load core indexes
+
+		new AnkiIndex(this.search)
+		new ObsidianIndex(this.search)
+
 		this.addSettingTab(new PowerSearchSettingsTab(this.app, this));
 		this.initLeaf();
 		this.addCommands()
 		this.registerEvents()
 		
-		// load core indexes
-		
-		new AnkiIndex(this.search)
-		new ObsidianIndex(this.search)
 	}
 
 	addCommands() {

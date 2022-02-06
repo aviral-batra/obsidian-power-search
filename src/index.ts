@@ -1,29 +1,45 @@
+import { Notice } from "obsidian";
 import { FuzzySearcher } from "./search";
 
 export abstract class SearchIndex {
 
     searcher: FuzzySearcher
-    notes: {id: any, type: string, search: string, original: any}[]
+    notes: { id: any, type: string, search: string, original: any }[]
     type: string
 
     constructor(searcher: FuzzySearcher, type: string) {
         this.searcher = searcher
+        // TODO enforce type is unique
         this.type = type
         this.notes = []
-        this.loadNotes().then(() => this.searcher.addIndex(this))
+        this.searcher.plugin._idxForSettings.push(this)
+        this.setupIndex()
     }
 
-    async loadNotes() {
+    async setupIndex(): Promise<void> {
+        if (this.searcher.plugin.settings.indexes[this.type]) {
+            if (await this.loadNotes()) this.searcher.addIndex(this)
+        } else this.searcher.removeIndex(this)
+    }
+
+    async loadNotes(): Promise<boolean> {
         this.notes = []
-        let origNotes = await this.getOriginalNotes()
-        this.beforeProduction(origNotes)
-        for (let o of origNotes) {
-            this.notes.push({
-                id: this.getIdFromOriginal(o),
-                type: this.type,
-                search: await this.getRawSearchDataFromOriginal(o),
-                original: o,
-            })
+        try {
+            let origNotes = await this.getOriginalNotes()
+            this.beforeProduction(origNotes)
+            for (let o of origNotes) {
+                this.notes.push({
+                    id: this.getIdFromOriginal(o),
+                    type: this.type,
+                    search: await this.getRawSearchDataFromOriginal(o),
+                    original: o,
+                })
+            }
+            return true
+        } catch (error) {
+            new Notice(`Failed to load notes for the index of type: ${this.type}, see debugging log`)
+            console.log(error)
+            return false
         }
     }
 
@@ -32,12 +48,12 @@ export abstract class SearchIndex {
     abstract getIdFromOriginal(original: any): any
 
     abstract getRawSearchDataFromOriginal(original: any): Promise<string>
-    
+
     abstract getDisplayFromOriginal(original: any): Promise<Element>
 
     // only needed if bulk load needed before production
     abstract beforeProduction(origNotes: any[]): Promise<void>
-    
+
 }
 
 

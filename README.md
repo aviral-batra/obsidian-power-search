@@ -58,7 +58,6 @@ TODO
 ## TODO 
 
 - add search query history to undo search history
-- only search on keydown if in markdown file
 - different columns show different types of notes
 - options to turn certain indexes on and off in the plugin settings
 - pin searches

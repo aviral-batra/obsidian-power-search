@@ -52,9 +52,15 @@ export class FuzzySearcher {
         await view.redraw() // TODO deal with null view
     }
 
+    removeIndex(index: SearchIndex) {
+        // TODO - for now just reload 
+    }
+
     addIndex(index: SearchIndex) {
-        this.indexes.push(index)
-        this.updateIndex(false, index)
+        if (!this.indexes.includes(index)) { 
+            this.indexes.push(index)
+            this.updateIndex(false, index)
+        }
     }
 
     highlightSearch(searchText: string, query: string) {
