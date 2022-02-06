@@ -1,15 +1,15 @@
 import { Index } from "flexsearch";
 import { debounce, MarkdownView } from "obsidian";
-import { IncomingAnkiConnectNote, invoke } from "./anki";
 import PowerSearch from "./main";
-import { stripHTML } from "./utils";
 import { stemmer } from "stemmer"
+import { SearchIndex } from "src";
 
 export class FuzzySearcher {
     plugin: PowerSearch
     index: Index
-    results: {query: string, res: [note: IncomingAnkiConnectNote, fldText: string][]}
-    notes: [note: IncomingAnkiConnectNote, fldText: string][]
+    results: {query: string, res: {type: string, highlightedSearch: string, display: Element}[]}
+    notes: {id: any, type: string, search: string, original: any, index: SearchIndex}[]
+    indexes: SearchIndex[]
 
     debouncedRefreshIndex: Function
     debouncedSearch: Function
@@ -25,8 +25,8 @@ export class FuzzySearcher {
             // TODO add matcher
             // TODO add custom stop word filter
         })
-        // create the index
-        this.updateIndex(false)
+        this.indexes = []
+        this.notes = []
     }
 
     async search(query: string) {
@@ -39,27 +39,60 @@ export class FuzzySearcher {
         })
         if (!(rs || rs.length)) {} // TODO this.results.push("No results found")
         else {
-            this.results.res = rs.map(r => this.notes.filter(n => n[0].noteId == r)[0])
-            // TODO highlighting
-            // let queryWords = [...new Set(query.split(" ").map(w => stemmer(w)))]
-            // this.results.res.forEach(r => {queryWords.forEach(qw => r[1] = this.highlight(r[1], qw))})
+            for (let r of rs) {
+                let n = this.notes.filter(n => n.id == r)[0]
+                this.results.res.push({
+                    type: n.type,
+                    highlightedSearch: this.highlightSearch(n.search, query),
+                    display: await n.index.getDisplayFromOriginal(n.original)
+                })
+            }
         }
-        await this.plugin.view.redraw()
+        let view = this.plugin.getView()
+        await view.redraw() // TODO deal with null view
     }
 
-    async updateIndex(update: boolean = true) {
+    addIndex(index: SearchIndex) {
+        this.indexes.push(index)
+        this.updateIndex(false, index)
+    }
+
+    highlightSearch(searchText: string, query: string) {
+        return searchText
+        // TODO
+        // let queryWords = [...new Set(query.split(" ").map(w => stemmer(w)))]
+        // this.results.res.forEach(r => {queryWords.forEach(qw => r[1] = this.highlight(r[1], qw))})
+    }
+
+        // highlight(content: string, keyword: string) {
+    //     const sanitizedKeyword = keyword.replace(/\W/g, '');
+    //     const regexForContent = new RegExp(sanitizedKeyword, 'gi');
+    //     return content.replace(regexForContent, '<span class="highlight">$&</span>');
+    // }
+
+
+    async updateIndex(update: boolean = true, idx: "all" | SearchIndex = "all") {
         this._index_updating = true
-        let ns: IncomingAnkiConnectNote[] = await this.getNotes()
-        this.notes = ns.map(n => {
-            let fieldsText: string = ""
-            for (let field in n.fields) {
-                fieldsText += `${n.fields[field].value} |`
+        if (!(idx == "all")) await this.doUpdateIndex(update, idx)
+        else {
+            for (let i of this.indexes) {
+                await this.doUpdateIndex(update, i)
             }
-            return [n, fieldsText]
-        })
-        if (update) this.notes.forEach(n => this.index.add(n[0].noteId, stripHTML(n[1])))
-        else this.notes.forEach(n => this.index.update(n[0].noteId, stripHTML(n[1])))
+        }
         this._index_updating = false
+    }
+
+    async doUpdateIndex(update: boolean, idx: SearchIndex) {
+        await idx.loadNotes()
+        if (update) idx.notes.forEach(n => this.index.add(n.id, n.search))
+            else {
+                idx.notes.forEach(n => {
+                    this.index.update(n.id, n.search)
+                    let searchNote: any = n
+                    searchNote["index"] = idx
+                    this.notes.push(searchNote)
+                })
+            }
     }
 
     _searchCurrent(block: boolean) {
@@ -90,18 +123,6 @@ export class FuzzySearcher {
             this.search(query)
         }
         else this.search(editor.getLine(editor.getCursor().line))
-    }
-
-    // highlight(content: string, keyword: string) {
-    //     const sanitizedKeyword = keyword.replace(/\W/g, '');
-    //     const regexForContent = new RegExp(sanitizedKeyword, 'gi');
-    //     return content.replace(regexForContent, '<span class="highlight">$&</span>');
-    // }
-
-    async getNotes(): Promise<IncomingAnkiConnectNote[]> {
-        let ids: number[] = await invoke("findNotes", {query: "deck:*"})
-        let notes: IncomingAnkiConnectNote[] = await invoke("notesInfo", {notes: ids})
-        return notes
     }
 
     refreshDebounces() {
