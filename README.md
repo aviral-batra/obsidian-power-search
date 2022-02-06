@@ -1,17 +1,25 @@
 # Obsidian Power Search
 
-Obsidian search is a plugin that allows you to search your notes while you are typing in obsidian (currently limited to only searching anki notes). This has a few benefits:
+Obsidian search is a plugin that allows you to search your notes while you are typing in obsidian (you can currently search your obsidian notes and your anki notes). This has a few benefits:
 - helps you to better link your ideas as you can link similar information when you see similar note text
 - helps prevent redundancy as you can see where you have written something else before
 - easier maintainence of notes as you can update them whenever you see something you want to change
+
+## General setup
+
+1. Install the plugin from community plugins
+2. Select your debounce refresh timeouts and activate the indexes you want to search by enabling their toggles
+3. Search happens automatically!
+
+N.B. Restart app to deactivate indexes (restart won't be needed in the future)
 
 ## Setup for built in indexes
 
 ### Anki
 
-1. Install from the community plugins list
-2. Install ankiconnect in anki if you haven't already
-3. Go to Tools -> Addons -> AnkiConnect -> Config and add the line ```app://obsidian.md``` to ```webCorsOriginList```, so it is something like this, if you haven't touched the config before
+
+1. Install ankiconnect in anki if you haven't already
+2. Go to Tools -> Addons -> AnkiConnect -> Config and add the line ```app://obsidian.md``` to ```webCorsOriginList```, so it is something like this, if you haven't touched the config before
 
 ```JSON
 {
@@ -27,9 +35,9 @@ Obsidian search is a plugin that allows you to search your notes while you are t
 }
 ```
 
-4. Restart Anki to apply the changes
-5. Run the plugin with anki running in the background
-6. See your search results appear in the search pane! (can be reopened with an obsidian command)
+3. Restart Anki to apply the changes
+4. Run the plugin with anki running in the background
+5. Activate the anki index in settings 
 
 ## Activating indexes
 
@@ -58,6 +66,8 @@ TODO
 ## TODO 
 
 - add search query history to undo search history
+- make ui blend in with theme
+- add a search bar at top of widget
 - different columns show different types of notes
 - not require restart for deactivating indexes
 - pin searches
