@@ -96,33 +96,36 @@ export class FuzzySearcher {
     }
 
     _searchCurrent(block: boolean) {
-        let editor = this.plugin.app.workspace.getActiveViewOfType(MarkdownView).editor
-        if (block) { // TODO this is clunky? find another way
-            let query: string = ""
-            let origLineNo = editor.getCursor().line 
-            let lineCount = editor.lineCount()
-            let lineNo = origLineNo
-            let line = editor.getLine(lineNo)
-            // get lines before cursor and add them to start of query
-            while (line.length != 0) {
-                line = editor.getLine(lineNo)
-                if (line) query = line + ` ${query}`
-                if (lineNo == 0) break
-                lineNo -= 1
-            }
+        let mv = this.plugin.app.workspace.getActiveViewOfType(MarkdownView)
+        if (mv) {
+            let editor = mv.editor
+            if (block) { // TODO this is clunky? find another way
+                let query: string = ""
+                let origLineNo = editor.getCursor().line 
+                let lineCount = editor.lineCount()
+                let lineNo = origLineNo
+                let line = editor.getLine(lineNo)
+                // get lines before cursor and add them to start of query
+                while (line.length != 0) {
+                    line = editor.getLine(lineNo)
+                    if (line) query = line + ` ${query}`
+                    if (lineNo == 0) break
+                    lineNo -= 1
+                }
 
-            // get lines after cursor and add them to end of query
-            lineNo = origLineNo + 1
-            line = editor.getLine(lineNo)
-            while (line) {
+                // get lines after cursor and add them to end of query
+                lineNo = origLineNo + 1
                 line = editor.getLine(lineNo)
-                if (line) query += ` ${line}`
-                if (lineNo == (lineCount - 1)) break
-                lineNo += 1
+                while (line) {
+                    line = editor.getLine(lineNo)
+                    if (line) query += ` ${line}`
+                    if (lineNo == (lineCount - 1)) break
+                    lineNo += 1
+                }
+                this.search(query)
             }
-            this.search(query)
+            else this.search(editor.getLine(editor.getCursor().line))
         }
-        else this.search(editor.getLine(editor.getCursor().line))
     }
 
     refreshDebounces() {

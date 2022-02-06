@@ -17,12 +17,15 @@
     height: auto;
 }
 
-.power-search-results-child {
-    overflow: scroll;
-    max-height: 300px;
+.power-search-results-child {}
+
+.power-search-results-type {
+    margin: 10px;
 }
 
 .power-search-results-card {
+    overflow: scroll;
+    max-height: 300px;
     transition: transform .7s;
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
     margin: 5px;

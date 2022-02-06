@@ -1,6 +1,7 @@
 import { Plugin } from 'obsidian';
 import { SEARCH_RESULT_VIEW_TYPE } from './constants';
 import { AnkiIndex } from './core/anki';
+import { ObsidianIndex } from './core/obs';
 import { FuzzySearcher } from './search';
 import { DEFAULT_SETTINGS, PowerSearchSettings, PowerSearchSettingsTab } from './settings';
 import { SearchResultView } from './view';
@@ -27,7 +28,11 @@ export default class PowerSearch extends Plugin {
 		this.initLeaf();
 		this.addCommands()
 		this.registerEvents()
+		
+		// load core indexes
+		
 		new AnkiIndex(this.search)
+		new ObsidianIndex(this.search)
 	}
 
 	addCommands() {

@@ -15,13 +15,13 @@ export abstract class SearchIndex {
 
     async loadNotes() {
         this.notes = []
-        this.beforeProduction()
         let origNotes = await this.getOriginalNotes()
+        this.beforeProduction(origNotes)
         for (let o of origNotes) {
             this.notes.push({
                 id: this.getIdFromOriginal(o),
                 type: this.type,
-                search: this.getRawSearchDataFromOriginal(o),
+                search: await this.getRawSearchDataFromOriginal(o),
                 original: o,
             })
         }
@@ -31,12 +31,12 @@ export abstract class SearchIndex {
 
     abstract getIdFromOriginal(original: any): any
 
-    abstract getRawSearchDataFromOriginal(original: any): string
+    abstract getRawSearchDataFromOriginal(original: any): Promise<string>
     
     abstract getDisplayFromOriginal(original: any): Promise<Element>
 
     // only needed if bulk load needed before production
-    abstract beforeProduction(): void
+    abstract beforeProduction(origNotes: any[]): Promise<void>
     
 }
 

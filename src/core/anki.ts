@@ -18,7 +18,7 @@ export class AnkiIndex extends SearchIndex {
         return original.noteId
     }
 
-    getRawSearchDataFromOriginal(original: IncomingAnkiConnectNote): string {
+    async getRawSearchDataFromOriginal(original: IncomingAnkiConnectNote): Promise<string> {
         return stripHTML(this.getFieldsText(original))
     }
 
@@ -31,7 +31,7 @@ export class AnkiIndex extends SearchIndex {
     }
     
 
-    beforeProduction(): void {
+    async beforeProduction(origNotes: IncomingAnkiConnectNote[]): Promise<void> {
         // bulk load not needed
     }
 

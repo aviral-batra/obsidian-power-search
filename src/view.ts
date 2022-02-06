@@ -18,6 +18,10 @@ export class SearchResultView extends ItemView {
         res.classList.add("view-content")
         for (let e of this.plugin.search.results.res) {
             let ch = res.createDiv({ cls: 'power-search-results-child' })
+            ch.createDiv({ 
+                cls: "power-search-results-type",
+                text: `Type: ${e.type}` 
+            })
             ch.append(e.display)
             // f.onerror = function() {} // TODO fix errors
         }
