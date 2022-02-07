@@ -11,15 +11,15 @@ export class ObsidianIndex extends SearchIndex {
         super(searcher, "Obsidian File") 
         this.fileTexts = {}
         this.firstLoad = true
-        this.searcher.plugin.app.vault.on("modify", (f) => this.onModify(f))
+        this.plugin.app.vault.on("modify", (f) => this.onModify(f))
     }
 
     async onModify(f: TAbstractFile) {
-        if (f instanceof TFile) this.fileTexts[f.path] = await this.searcher.plugin.app.vault.read(f)
+        if (f instanceof TFile) this.fileTexts[f.path] = await this.plugin.app.vault.read(f)
     }
 
     async getOriginalNotes(): Promise<TFile[]> {
-        return this.searcher.plugin.app.vault.getMarkdownFiles()
+        return this.plugin.app.vault.getMarkdownFiles()
     }
 
     getNameFromOriginal(original: TFile): string {
@@ -42,13 +42,13 @@ export class ObsidianIndex extends SearchIndex {
 
     async beforeProduction(origNotes: TFile[]): Promise<void> {
         if (this.firstLoad) for (let n of origNotes) {
-            this.fileTexts[n.path] = await this.searcher.plugin.app.vault.read(n)
+            this.fileTexts[n.path] = await this.plugin.app.vault.read(n)
         }
         this.firstLoad = false
     }
 
     getLinkFromOriginal(original: TFile): string {
-        let vaultName = this.searcher.plugin.app.vault.getName()
+        let vaultName = this.plugin.app.vault.getName()
         return "obsidian://open?vault=" + encodeURIComponent(vaultName) + String.raw`&file=` + encodeURIComponent(original.path)
     }
 

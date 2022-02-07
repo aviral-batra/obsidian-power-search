@@ -70,7 +70,7 @@ export class PowerSearchSettingsTab extends PluginSettingTab {
 		
 		containerEl.createEl('h3', {text: 'Search Indexes'});
 		
-		this.plugin._idxForSettings.forEach(i => {
+		this.plugin.indexes.forEach(i => {
 			new Setting(containerEl)
 				.setName(i.type)
 				.setDesc(`Add notes of type ${i.type} to the content to be searched`)

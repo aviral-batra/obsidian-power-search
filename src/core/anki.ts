@@ -7,7 +7,7 @@ export class AnkiIndex extends SearchIndex {
 
     constructor(searcher: FuzzySearcher) {
         super(searcher, "Anki Note")
-        this.searcher.plugin.registerObsidianProtocolHandler("anki", (params: ObsidianProtocolData) => invoke("guiBrowse", {query: `nid:${params.id}`}))
+        this.plugin.registerObsidianProtocolHandler("anki", (params: ObsidianProtocolData) => invoke("guiBrowse", {query: `nid:${params.id}`}))
     }
 
     async getOriginalNotes(): Promise<IncomingAnkiConnectNote[]> {

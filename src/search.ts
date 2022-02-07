@@ -36,6 +36,7 @@ export class FuzzySearcher {
     }
 
     async search(query: string) {
+        if (!this._index_updating) this.debouncedRefreshIndex()
         this.results = {query: query, res: []}
         if (!query) return 
         // TODO customise options in settings
@@ -89,26 +90,34 @@ export class FuzzySearcher {
 
     async updateIndex(update: boolean = true, idx: "all" | SearchIndex = "all") {
         this._index_updating = true
-        if (!(idx == "all")) await this.doUpdateIndex(update, idx)
+        if (!(idx == "all")) await this._doUpdateIndex(update, idx)
         else {
             for (let i in this.indexes) {
-                await this.doUpdateIndex(update, this.indexes[i])
+                await this._doUpdateIndex(update, this.indexes[i])
             }
         }
+        this._refreshNotesList()
         this._index_updating = false
     }
 
-    async doUpdateIndex(update: boolean, idx: SearchIndex) {
+    async _doUpdateIndex(update: boolean, idx: SearchIndex) {
         await idx.loadNotes()
         if (update) idx.notes.forEach(n => this.index.add(n.id, n.search))
-            else {
-                idx.notes.forEach(n => {
-                    this.index.update(n.id, n.search)
-                    let searchNote: any = n
-                    searchNote.index = idx
-                    this.notes.push(searchNote)
-                })
-            }
+        else {
+            idx.notes.forEach(n => {
+                this.index.update(n.id, n.search)
+            })
+        }
+    }
+
+    _refreshNotesList() {
+        this.notes = []
+        for (let i in this.indexes) {
+            this.indexes[i].notes.forEach(n => {
+                let searchNote: SearchNote = Object.assign({index: this.indexes[i]}, n)
+                this.notes.push(searchNote)
+            })
+        }
     }
 
     _searchCurrent(block: boolean) {

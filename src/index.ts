@@ -1,4 +1,5 @@
 import { Notice } from "obsidian";
+import PowerSearch from "./main";
 import { FuzzySearcher } from "./search";
 
 export interface IndexNote {
@@ -12,22 +13,25 @@ export interface IndexNote {
 
 export abstract class SearchIndex {
 
+    plugin: PowerSearch
     searcher: FuzzySearcher
+    
     notes: IndexNote[]
     type: string
 
     constructor(searcher: FuzzySearcher, type: string) {
         this.searcher = searcher
+        this.plugin = this.searcher.plugin
         // TODO enforce type is unique
         // TODO enforce id is unique
         this.type = type
         this.notes = []
-        this.searcher.plugin._idxForSettings.push(this)
+        this.plugin.indexes.push(this)
         this.setupIndex()
     }
 
     async setupIndex(): Promise<void> {
-        if (this.searcher.plugin.settings.indexes[this.type]) {
+        if (this.plugin.settings.indexes[this.type]) {
             if (await this.loadNotes()) this.searcher.addIndex(this)
         } else  await this.searcher.removeIndex(this)
     }
