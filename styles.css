@@ -17,7 +17,13 @@
     height: auto;
 }
 
-.power-search-results-child {}
+.power-search-results-child {
+    transition: transform .7s;
+    border: 0.3px groove;
+    box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 0.4);
+    padding: 2px 16px;
+    margin: 10px;
+}
 
 .power-search-results-type {
     margin: 10px;
@@ -26,12 +32,10 @@
 .power-search-results-card {
     overflow: scroll;
     max-height: 300px;
-    transition: transform .7s;
-    border: 0.3px groove;
-    box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 0.4);
     margin: 5px;
-    width: auto;
-    padding: 2px 16px;
+    border-top: 0.1px groove;
+    padding: 8px 16px;
+    user-select: text;
 }
 
 .power-search-results-text {

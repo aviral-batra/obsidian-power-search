@@ -22,6 +22,10 @@ export class ObsidianIndex extends SearchIndex {
         return this.searcher.plugin.app.vault.getMarkdownFiles()
     }
 
+    getNameFromOriginal(original: TFile): string {
+        return original.name
+    }
+
     getIdFromOriginal(original: TFile) {
         return original.path
     }
@@ -41,6 +45,11 @@ export class ObsidianIndex extends SearchIndex {
             this.fileTexts[n.path] = await this.searcher.plugin.app.vault.read(n)
         }
         this.firstLoad = false
+    }
+
+    getLinkFromOriginal(original: TFile): string {
+        let vaultName = this.searcher.plugin.app.vault.getName()
+        return "obsidian://open?vault=" + encodeURIComponent(vaultName) + String.raw`&file=` + encodeURIComponent(original.path)
     }
 
     

@@ -20,14 +20,11 @@ export class SearchResultView extends ItemView {
         if (!Object.keys(idxs).length) res.createDiv({cls: "power-search-results-type", text: "No indexes activated! They can be activated in the Power Search settings tab."});
         for (let e of this.plugin.search.results.res) {
             let ch = res.createDiv({ cls: 'power-search-results-child' })
-            ch.createDiv({ 
-                cls: "power-search-results-type",
-                text: `Type: ${e.type}` 
-            })
+            let headEl = ch.createDiv({ cls: "power-search-results-type" })
+            headEl.innerHTML = `<a href="${e.link}">${e.name}</a> Type: ${e.type}`
             ch.append(e.display)
             // f.onerror = function() {} // TODO fix errors
         }
-        // finishRenderMath()
         this.containerEl.children[1].empty()
         this.containerEl.children[1].append(res)
     }

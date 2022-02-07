@@ -68,6 +68,7 @@ TODO
 ## TODO 
 
 - add search query history to undo search history
+- cache search results
 - make ui blend in with theme
 - add a search bar at top of widget
 - different columns show different types of notes

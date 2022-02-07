@@ -2,13 +2,17 @@ import { Index } from "flexsearch";
 import { debounce, MarkdownView } from "obsidian";
 import PowerSearch from "./main";
 import { stemmer } from "stemmer"
-import { SearchIndex } from "src";
+import { IndexNote, SearchIndex } from "src";
+
+interface SearchNote extends IndexNote {
+    index: SearchIndex
+}
 
 export class FuzzySearcher {
     plugin: PowerSearch
     index: Index
-    results: {query: string, res: {type: string, highlightedSearch: string, display: Element}[]}
-    notes: {id: any, type: string, search: string, original: any, index: SearchIndex}[]
+    results: {query: string, res: {id: any, name: string, link: string, type: string, highlightedSearch: string, display: Element}[]}
+    notes: SearchNote[]
     indexes: {[type: string]: SearchIndex}
 
     debouncedRefreshIndex: Function
@@ -43,9 +47,12 @@ export class FuzzySearcher {
             for (let r of rs) {
                 let n = this.notes.filter(n => n.id == r)[0]
                 this.results.res.push({
+                    id: n.id, 
+                    name: n.name,
+                    link: n.link,
                     type: n.type,
                     highlightedSearch: this.highlightSearch(n.search, query),
-                    display: await n.index.getDisplayFromOriginal(n.original)
+                    display: await n.index.getDisplayFromOriginal(n.original),
                 })
             }
         }
@@ -98,7 +105,7 @@ export class FuzzySearcher {
                 idx.notes.forEach(n => {
                     this.index.update(n.id, n.search)
                     let searchNote: any = n
-                    searchNote["index"] = idx
+                    searchNote.index = idx
                     this.notes.push(searchNote)
                 })
             }

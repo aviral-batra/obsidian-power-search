@@ -1,4 +1,4 @@
-import { renderMath } from "obsidian"
+import { ObsidianProtocolData, renderMath } from "obsidian"
 import { SearchIndex } from "src"
 import { FuzzySearcher } from "src/search"
 import { stripHTML } from "src/utils"
@@ -7,6 +7,7 @@ export class AnkiIndex extends SearchIndex {
 
     constructor(searcher: FuzzySearcher) {
         super(searcher, "Anki Note")
+        this.searcher.plugin.registerObsidianProtocolHandler("anki", (params: ObsidianProtocolData) => invoke("guiBrowse", {query: `nid:${params.id}`}))
     }
 
     async getOriginalNotes(): Promise<IncomingAnkiConnectNote[]> {
@@ -17,6 +18,14 @@ export class AnkiIndex extends SearchIndex {
 
     getIdFromOriginal(original: IncomingAnkiConnectNote) {
         return original.noteId
+    }
+
+    getNameFromOriginal(original: IncomingAnkiConnectNote): string {
+        return original.noteId.toString()
+    }
+
+    getLinkFromOriginal(original: IncomingAnkiConnectNote): string {
+        return "obsidian://anki?" + String.raw`&id=` + encodeURIComponent(original.noteId)
     }
 
     async getRawSearchDataFromOriginal(original: IncomingAnkiConnectNote): Promise<string> {

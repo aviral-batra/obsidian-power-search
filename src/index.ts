@@ -1,10 +1,19 @@
 import { Notice } from "obsidian";
 import { FuzzySearcher } from "./search";
 
+export interface IndexNote {
+    id: any;
+    name: string,
+    link: string;
+    type: string;
+    search: string;
+    original: any;
+}
+
 export abstract class SearchIndex {
 
     searcher: FuzzySearcher
-    notes: { id: any, type: string, search: string, original: any }[]
+    notes: IndexNote[]
     type: string
 
     constructor(searcher: FuzzySearcher, type: string) {
@@ -31,6 +40,8 @@ export abstract class SearchIndex {
             for (let o of origNotes) {
                 this.notes.push({
                     id: this.getIdFromOriginal(o),
+                    link: this.getLinkFromOriginal(o),
+                    name: this.getNameFromOriginal(o),
                     type: this.type,
                     search: await this.getRawSearchDataFromOriginal(o),
                     original: o,
@@ -48,12 +59,17 @@ export abstract class SearchIndex {
 
     abstract getIdFromOriginal(original: any): any
 
+    abstract getLinkFromOriginal(original: any): string
+
+    abstract getNameFromOriginal(original: any): string
+
     abstract getRawSearchDataFromOriginal(original: any): Promise<string>
 
     abstract getDisplayFromOriginal(original: any): Promise<Element>
 
     // only needed if bulk load needed before production
     abstract beforeProduction(origNotes: any[]): Promise<void>
+
 
 }
 
