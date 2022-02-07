@@ -10,6 +10,7 @@ export abstract class SearchIndex {
     constructor(searcher: FuzzySearcher, type: string) {
         this.searcher = searcher
         // TODO enforce type is unique
+        // TODO enforce id is unique
         this.type = type
         this.notes = []
         this.searcher.plugin._idxForSettings.push(this)
@@ -19,7 +20,7 @@ export abstract class SearchIndex {
     async setupIndex(): Promise<void> {
         if (this.searcher.plugin.settings.indexes[this.type]) {
             if (await this.loadNotes()) this.searcher.addIndex(this)
-        } else this.searcher.removeIndex(this)
+        } else  await this.searcher.removeIndex(this)
     }
 
     async loadNotes(): Promise<boolean> {

@@ -52,7 +52,7 @@ export default class PowerSearch extends Plugin {
 		// when text is selected, it is searched
 		this.registerDomEvent(document, "selectionchange", () => {this.search.debouncedSearch(document.getSelection().toString())})
 		// while typing, the text is searched
-		this.registerDomEvent(document, "keydown", () => this.search.debouncedSearchCurrent(true)) // TODO customise search block vs line
+		this.registerDomEvent(document, "keydown", () => this.search.debouncedSearchCurrent(this.settings.searchBlock)) // TODO customise search block vs line
 		// this.registerObsidianProtocolHandler("open" => ) TODO if view not open in sidebar, open protocols in new pane
 	}
 

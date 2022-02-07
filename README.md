@@ -11,8 +11,6 @@ Obsidian search is a plugin that allows you to search your notes while you are t
 2. Select your debounce refresh timeouts and activate the indexes you want to search by enabling their toggles
 3. Search happens automatically!
 
-N.B. Restart app to deactivate indexes (restart won't be needed in the future)
-
 ## Setup for built in indexes
 
 ### Anki
@@ -41,7 +39,7 @@ N.B. Restart app to deactivate indexes (restart won't be needed in the future)
 
 ## Activating indexes
 
-You can toggle the setting for the index within the "Power Search" Settings tab in obsidian. Activating just requires toggling however deactivating also requires an app restart (will not be required as a result of future updates).
+You can toggle the setting for the index within the "Power Search" Settings tab in obsidian. Toggle the index switch to add a certain type of note to the content to be searched (and rendered in the pane).
 
 ## Setup for external indexes
 
@@ -69,7 +67,6 @@ TODO
 - make ui blend in with theme
 - add a search bar at top of widget
 - different columns show different types of notes
-- not require restart for deactivating indexes
 - pin searches
 - paginate results and allow page limit configuration
 - deal with cannot connect to anki errors

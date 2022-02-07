@@ -1,14 +1,21 @@
-import { MarkdownRenderer, TFile } from "obsidian"
+import { MarkdownRenderer, TAbstractFile, TFile, Vault } from "obsidian"
 import { SearchIndex } from "src"
 import { FuzzySearcher } from "src/search"
 
 export class ObsidianIndex extends SearchIndex {
 
-    fileTexts: {[path: string]: string}
+    fileTexts: {[path: string]: string};
+    firstLoad: boolean;
 
     constructor(searcher: FuzzySearcher) {
         super(searcher, "Obsidian File") 
         this.fileTexts = {}
+        this.firstLoad = true
+        this.searcher.plugin.app.vault.on("modify", (f) => this.onModify(f))
+    }
+
+    async onModify(f: TAbstractFile) {
+        if (f instanceof TFile) this.fileTexts[f.path] = await this.searcher.plugin.app.vault.read(f)
     }
 
     async getOriginalNotes(): Promise<TFile[]> {
@@ -30,9 +37,11 @@ export class ObsidianIndex extends SearchIndex {
     }
 
     async beforeProduction(origNotes: TFile[]): Promise<void> {
-        for (let n of origNotes) {
-            this.fileTexts[n.path] = await this.searcher.plugin.app.vault.cachedRead(n)
+        if (this.firstLoad) for (let n of origNotes) {
+            this.fileTexts[n.path] = await this.searcher.plugin.app.vault.read(n)
         }
+        this.firstLoad = false
     }
+
     
 }

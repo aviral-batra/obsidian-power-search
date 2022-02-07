@@ -9,11 +9,13 @@ export class FuzzySearcher {
     index: Index
     results: {query: string, res: {type: string, highlightedSearch: string, display: Element}[]}
     notes: {id: any, type: string, search: string, original: any, index: SearchIndex}[]
-    indexes: SearchIndex[]
+    indexes: {[type: string]: SearchIndex}
 
     debouncedRefreshIndex: Function
     debouncedSearch: Function
     debouncedSearchCurrent: Function
+    _debouncedSearch: Function
+    _debouncedSearchCurrent: Function
 
     _index_updating: boolean;
 
@@ -25,12 +27,11 @@ export class FuzzySearcher {
             // TODO add matcher
             // TODO add custom stop word filter
         })
-        this.indexes = []
+        this.indexes = {}
         this.notes = []
     }
 
     async search(query: string) {
-        if (!this._index_updating) this.debouncedRefreshIndex()
         this.results = {query: query, res: []}
         if (!query) return 
         // TODO customise options in settings
@@ -52,13 +53,15 @@ export class FuzzySearcher {
         await view.redraw() // TODO deal with null view
     }
 
-    removeIndex(index: SearchIndex) {
-        // TODO - for now just reload 
+    async removeIndex(idx: SearchIndex) {
+        await idx.loadNotes()
+        idx.notes.forEach(n => this.index.remove(n.id))
+        delete this.indexes[idx.type]
     }
 
     addIndex(index: SearchIndex) {
-        if (!this.indexes.includes(index)) { 
-            this.indexes.push(index)
+        if (!(index.type in this.indexes)) { 
+            this.indexes[index.type] = index
             this.updateIndex(false, index)
         }
     }
@@ -81,8 +84,8 @@ export class FuzzySearcher {
         this._index_updating = true
         if (!(idx == "all")) await this.doUpdateIndex(update, idx)
         else {
-            for (let i of this.indexes) {
-                await this.doUpdateIndex(update, i)
+            for (let i in this.indexes) {
+                await this.doUpdateIndex(update, this.indexes[i])
             }
         }
         this._index_updating = false
@@ -134,10 +137,22 @@ export class FuzzySearcher {
         }
     }
 
+    _debRefreshIndexThenCall(func: CallableFunction) {
+        function new_function(args: any) {
+            if (!this._index_updating) this.debouncedRefreshIndex()
+            func(args)
+        }
+        return new_function
+    }
+
     refreshDebounces() {
         this.debouncedRefreshIndex = debounce(this.updateIndex, this.plugin.settings.refreshDebounce) 
-        this.debouncedSearch = debounce((query: string) => this.search(query), this.plugin.settings.searchDebounce)
-        this.debouncedSearchCurrent = debounce((block: boolean) => this._searchCurrent(block), this.plugin.settings.searchDebounce)
+
+        this._debouncedSearch = debounce((query: string) => this.search(query), this.plugin.settings.searchDebounce)
+        this._debouncedSearchCurrent = debounce((block: boolean) => this._searchCurrent(block), this.plugin.settings.searchDebounce)
+
+        this.debouncedSearch = this._debRefreshIndexThenCall(this._debouncedSearch)
+        this.debouncedSearchCurrent = this._debRefreshIndexThenCall(this._debouncedSearchCurrent)
     }
 
 }

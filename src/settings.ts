@@ -4,13 +4,15 @@ import PowerSearch from "./main";
 export interface PowerSearchSettings {
 	searchDebounce: number;
 	refreshDebounce: number;
+	searchBlock: boolean;
 	indexes: {[indexType: string]: boolean}
 }
 
 export const DEFAULT_SETTINGS: PowerSearchSettings = {
 	searchDebounce: 1000,
 	refreshDebounce: 2000,
-	indexes: {}
+	searchBlock: true,
+	indexes: {},
 }
 
 
@@ -31,7 +33,7 @@ export class PowerSearchSettingsTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName('Search after time')
-			.setDesc('This is the time after you stop typing/stop selecting things that the search occurs (debounce timeout)')
+			.setDesc('This is the time, in milliseconds, after you stop typing/stop selecting things that the search occurs (debounce timeout)')
 			.addSlider(slider => slider
 				.setLimits(500, 5000, 100)
 				.setValue(this.plugin.settings.searchDebounce)
@@ -44,7 +46,7 @@ export class PowerSearchSettingsTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 		.setName('Refresh after time')
-		.setDesc('This is the time after you stop searching that the index refreshes i.e. note changes + new notes + note deletions are loaded from anki into the index (debounce timeout)')
+		.setDesc('This is the time, in milliseconds, after you stop searching that the index refreshes i.e. changes to the searchable content are loaded into the search index (debounce timeout)')
 		.addSlider(slider => slider
 			.setLimits(3000, 30000, 500)
 			.setValue(this.plugin.settings.refreshDebounce)
@@ -54,6 +56,17 @@ export class PowerSearchSettingsTab extends PluginSettingTab {
 				await this.plugin.saveSettings();
 				this.plugin.search.refreshDebounces()
 			}));
+
+		new Setting(containerEl)
+			.setName("Search text blocks")
+			.setDesc(`For search on type, queries are built from blocks of text surrounded by whitespace if true and individual lines if false (RESTART REQUIRED TO ENACT CHANGES)`)
+			.addToggle(toggle => toggle
+				.setValue(this.plugin.settings.searchBlock)
+				.onChange(async (value) => {
+					this.plugin.settings.searchBlock = value;
+					await this.plugin.saveSettings();
+				})
+			);
 		
 		containerEl.createEl('h3', {text: 'Search Indexes'});
 		
