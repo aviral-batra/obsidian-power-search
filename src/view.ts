@@ -16,6 +16,8 @@ export class SearchResultView extends ItemView {
         let tbarEl = createDiv({cls: "power-search-toolbar"})
         let res = rootEl.createDiv({ cls: 'power-search-results-children' })
         res.classList.add("view-content")
+        let idxs = this.plugin.search.indexes
+        if (!Object.keys(idxs).length) res.createDiv({cls: "power-search-results-type", text: "No indexes activated! They can be activated in the Power Search settings tab."});
         for (let e of this.plugin.search.results.res) {
             let ch = res.createDiv({ cls: 'power-search-results-child' })
             ch.createDiv({ 
