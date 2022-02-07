@@ -13,6 +13,10 @@ Obsidian search is a plugin that allows you to search your notes while you are t
 
 ## Setup for built in indexes
 
+### Obsidian
+
+Automatic - just activate in settings!
+
 ### Anki
 
 
