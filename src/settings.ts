@@ -1,10 +1,11 @@
-import { App, Notice, PluginSettingTab, Setting } from "obsidian";
+import { App, PluginSettingTab, Setting } from "obsidian";
 import PowerSearch from "./main";
 
 export interface PowerSearchSettings {
 	searchDebounce: number;
 	refreshDebounce: number;
 	searchBlock: boolean;
+	pageSize: number
 	indexes: {[indexType: string]: boolean}
 }
 
@@ -12,6 +13,7 @@ export const DEFAULT_SETTINGS: PowerSearchSettings = {
 	searchDebounce: 1000,
 	refreshDebounce: 2000,
 	searchBlock: true,
+	pageSize: 10,
 	indexes: {},
 }
 
@@ -42,7 +44,8 @@ export class PowerSearchSettingsTab extends PluginSettingTab {
 					this.plugin.settings.searchDebounce = value;
 					await this.plugin.saveSettings();
 					this.plugin.search.refreshDebounces()
-				}));
+				})
+			);
 
 		new Setting(containerEl)
 		.setName('Refresh after time')
@@ -55,7 +58,8 @@ export class PowerSearchSettingsTab extends PluginSettingTab {
 				this.plugin.settings.refreshDebounce = value;
 				await this.plugin.saveSettings();
 				this.plugin.search.refreshDebounces()
-			}));
+			})
+		);
 
 		new Setting(containerEl)
 			.setName("Search text blocks")
@@ -68,6 +72,19 @@ export class PowerSearchSettingsTab extends PluginSettingTab {
 				})
 			);
 		
+		new Setting(containerEl)
+			.setName("Page Size")
+			.setDesc(`Number of results shown per search result page`)
+			.addSlider(slider => slider
+				.setLimits(1, 100, 1)
+				.setValue(this.plugin.settings.pageSize)
+				.setDynamicTooltip()
+				.onChange(async (value) => {
+					this.plugin.settings.pageSize = value;
+					await this.plugin.saveSettings();
+				})
+			);
+
 		containerEl.createEl('h3', {text: 'Search Indexes'});
 		
 		this.plugin.indexes.forEach(i => {

@@ -12,9 +12,16 @@
 
 .power-search-toolbar {} */
 
-.power-search-results-children {
-    overflow: scroll;
-    height: auto;
+.power-search-arrow-bar {
+    display: flex;
+    justify-content: center;
+}
+
+.power-search-results-children {}
+
+.power-search-arrow-bar-item {
+    size: 15px;
+    padding: 4px;
 }
 
 .power-search-results-child {

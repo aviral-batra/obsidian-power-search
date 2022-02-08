@@ -5,17 +5,19 @@ import { FuzzySearcher } from "src/search"
 export class ObsidianIndex extends SearchIndex {
 
     fileTexts: {[path: string]: string};
+    modifiedFiles: TFile[]
     firstLoad: boolean;
 
     constructor(searcher: FuzzySearcher) {
         super(searcher, "Obsidian File") 
         this.fileTexts = {}
+        this.modifiedFiles = []
         this.firstLoad = true
         this.plugin.app.vault.on("modify", (f) => this.onModify(f))
     }
 
     async onModify(f: TAbstractFile) {
-        if (f instanceof TFile) this.fileTexts[f.path] = await this.plugin.app.vault.read(f)
+        if (f instanceof TFile && this.modifiedFiles.indexOf(f) == -1) this.modifiedFiles.push(f)
     }
 
     async getOriginalNotes(): Promise<TFile[]> {
@@ -43,8 +45,11 @@ export class ObsidianIndex extends SearchIndex {
     async beforeProduction(origNotes: TFile[]): Promise<void> {
         if (this.firstLoad) for (let n of origNotes) {
             this.fileTexts[n.path] = await this.plugin.app.vault.read(n)
+        } else {
+            // for (let f of this.modifiedFiles) this.fileTexts[f.path] = await this.plugin.app.vault.cachedRead(f)
         }
         this.firstLoad = false
+        this.modifiedFiles = []
     }
 
     getLinkFromOriginal(original: TFile): string {

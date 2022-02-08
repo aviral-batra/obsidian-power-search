@@ -37,12 +37,20 @@ export class FuzzySearcher {
 
     async search(query: string) {
         if (!this._index_updating) this.debouncedRefreshIndex()
+        await this._search(query)
+    }
+
+    async _search(query: string, offset: number = 0, paginate: boolean = false) {
         this.results = {query: query, res: []}
         if (!query) return 
         // TODO customise options in settings
-        let rs = this.index.search(query, {
-            suggest: true,
-        })
+        let rs = this.index.search(query,
+            {
+                limit: this.plugin.settings.pageSize,
+                offset: offset,
+                suggest: true,
+            }
+        )
         if (!(rs || rs.length)) {} // TODO this.results.push("No results found")
         else {
             for (let r of rs) {
@@ -58,7 +66,8 @@ export class FuzzySearcher {
             }
         }
         let view = this.plugin.getView()
-        await view.redraw() // TODO deal with null view
+        if (!paginate) await view.redraw() // TODO deal with null view
+        else if (rs.length > 0) await view._redraw()
     }
 
     async removeIndex(idx: SearchIndex) {
@@ -162,10 +171,10 @@ export class FuzzySearcher {
     }
 
     refreshDebounces() {
-        this.debouncedRefreshIndex = debounce(this.updateIndex, this.plugin.settings.refreshDebounce) 
+        this.debouncedRefreshIndex = debounce(this.updateIndex, this.plugin.settings.refreshDebounce, true) 
 
-        this._debouncedSearch = debounce((query: string) => this.search(query), this.plugin.settings.searchDebounce)
-        this._debouncedSearchCurrent = debounce((block: boolean) => this._searchCurrent(block), this.plugin.settings.searchDebounce)
+        this._debouncedSearch = debounce((query: string) => this.search(query), this.plugin.settings.searchDebounce, true)
+        this._debouncedSearchCurrent = debounce((block: boolean) => this._searchCurrent(block), this.plugin.settings.searchDebounce, true)
 
         this.debouncedSearch = this._debRefreshIndexThenCall(this._debouncedSearch)
         this.debouncedSearchCurrent = this._debRefreshIndexThenCall(this._debouncedSearchCurrent)
