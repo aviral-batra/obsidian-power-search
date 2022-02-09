@@ -67,6 +67,12 @@ TODO
 
 ## TODO 
 
+- only update flexsearch index with changed notes/cards + keep the display etc. stored for use if the cards are not changed
+- error - use already loaded notes to get ids if notes not loading (when removing index)/ whatever the problem is - id is undefined when anki index not able to load
+- index specific settings e.g. obsidian index remove current file from rendered results
+
+- make card shadow darker
+
 - add search query history to undo search history
 - cache search results
 - make ui blend in with theme

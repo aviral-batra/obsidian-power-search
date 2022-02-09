@@ -37,10 +37,10 @@ export abstract class SearchIndex {
     }
 
     async loadNotes(): Promise<boolean> {
-        this.notes = []
         try {
             let origNotes = await this.getOriginalNotes()
             this.beforeProduction(origNotes)
+            this.notes = []
             for (let o of origNotes) {
                 this.notes.push({
                     id: this.getIdFromOriginal(o),
@@ -53,8 +53,9 @@ export abstract class SearchIndex {
             }
             return true
         } catch (error) {
-            new Notice(`Failed to load notes for the index of type: ${this.type}, see debugging log`)
+            if (!this.notes) this.notes = []
             console.log(error)
+            new Notice(`Failed to load notes for the index of type: ${this.type}, see debugging log`)
             return false
         }
     }
