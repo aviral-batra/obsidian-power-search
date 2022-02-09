@@ -14,10 +14,20 @@ export class ObsidianIndex extends SearchIndex {
         this.modifiedFiles = []
         this.firstLoad = true
         this.plugin.app.vault.on("modify", (f) => this.onModify(f))
+        this.plugin.app.vault.on("delete", (f) => this.onDelete(f))
+        this.plugin.app.vault.on("create", (f) => this.onCreate(f))
     }
 
-    async onModify(f: TAbstractFile) {
+    onModify(f: TAbstractFile) {
         if (f instanceof TFile && this.modifiedFiles.indexOf(f) == -1) this.modifiedFiles.push(f)
+    }
+
+    onDelete(f: TAbstractFile) {
+        if (f instanceof TFile && f.path in this.fileTexts) delete this.fileTexts[f.path]
+    }
+
+    async onCreate(f: TAbstractFile) {
+        if (f instanceof TFile) this.fileTexts[f.path] = await this.plugin.app.vault.cachedRead(f)
     }
 
     async getOriginalNotes(): Promise<TFile[]> {
