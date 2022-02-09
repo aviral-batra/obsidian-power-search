@@ -32,7 +32,7 @@ export abstract class SearchIndex {
 
     async setupIndex(): Promise<void> {
         if (this.plugin.settings.indexes[this.type]) {
-            if (await this.loadNotes()) this.searcher.addIndex(this)
+            if (await this.loadNotes()) this.searcher.addIndexIfNotAlreadyAdded(this)
         } else  await this.searcher.removeIndex(this)
     }
 

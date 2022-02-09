@@ -46,7 +46,7 @@ export class ObsidianIndex extends SearchIndex {
         if (this.firstLoad) for (let n of origNotes) {
             this.fileTexts[n.path] = await this.plugin.app.vault.read(n)
         } else {
-            // for (let f of this.modifiedFiles) this.fileTexts[f.path] = await this.plugin.app.vault.cachedRead(f)
+            for (let f of this.modifiedFiles) this.fileTexts[f.path] = await this.plugin.app.vault.cachedRead(f)
         }
         this.firstLoad = false
         this.modifiedFiles = []

@@ -76,7 +76,7 @@ export class FuzzySearcher {
         delete this.indexes[idx.type]
     }
 
-    addIndex(index: SearchIndex) {
+    addIndexIfNotAlreadyAdded(index: SearchIndex) {
         if (!(index.type in this.indexes)) { 
             this.indexes[index.type] = index
             this.updateIndex(false, index)
