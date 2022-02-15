@@ -1,6 +1,6 @@
 import { Notice } from "obsidian";
 import PowerSearch from "./main";
-import { FuzzySearcher } from "./search";
+import { Searcher } from "./search";
 
 export interface IndexNote {
     id: any;
@@ -14,26 +14,29 @@ export interface IndexNote {
 export abstract class SearchIndex {
 
     plugin: PowerSearch
-    searcher: FuzzySearcher
+    searcher: Searcher
+
+    errorShown: number;
     
     notes: IndexNote[]
     type: string
 
-    constructor(searcher: FuzzySearcher, type: string) {
+    constructor(searcher: Searcher, type: string) {
         this.searcher = searcher
         this.plugin = this.searcher.plugin
         // TODO enforce type is unique
         // TODO enforce id is unique
         this.type = type
         this.notes = []
+        this.errorShown = 0
         this.plugin.indexes.push(this)
         this.setupIndex()
     }
 
     async setupIndex(): Promise<void> {
         if (this.plugin.settings.indexes[this.type]) {
-            if (await this.loadNotes()) this.searcher.addIndexIfNotAlreadyAdded(this)
-        } else  await this.searcher.removeIndex(this)
+            this.searcher.addIndexIfNotAlreadyAdded(this)
+        } else await this.searcher.removeIndex(this)
     }
 
     async loadNotes(): Promise<boolean> {
@@ -55,7 +58,10 @@ export abstract class SearchIndex {
         } catch (error) {
             if (!this.notes) this.notes = []
             console.log(error)
-            new Notice(`Failed to load notes for the index of type: ${this.type}, see debugging log`)
+            if (this.errorShown <= 2) {
+                new Notice(`Failed to load notes for the index of type: ${this.type}, see debugging log`)
+                this.errorShown += 1
+            }
             return false
         }
     }

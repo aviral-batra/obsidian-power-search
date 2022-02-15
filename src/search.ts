@@ -8,7 +8,7 @@ interface SearchNote extends IndexNote {
     index: SearchIndex
 }
 
-export class FuzzySearcher {
+export class Searcher {
     plugin: PowerSearch
     index: Index
     results: {query: string, res: {id: any, name: string, link: string, type: string, highlightedSearch: string, display: Element}[]}
@@ -31,6 +31,7 @@ export class FuzzySearcher {
             // TODO add matcher
             // TODO add custom stop word filter
         })
+        this.results = {query: "", res: []}
         this.indexes = {}
         this.notes = []
     }
@@ -51,7 +52,7 @@ export class FuzzySearcher {
                 suggest: true,
             }
         )
-        if (!(rs || rs.length)) {} // TODO this.results.push("No results found")
+        if (!(rs || rs.length)) {}
         else {
             for (let r of rs) {
                 let n = this.notes.filter(n => n.id == r)[0]

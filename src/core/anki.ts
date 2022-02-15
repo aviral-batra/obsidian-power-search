@@ -1,11 +1,11 @@
 import { ObsidianProtocolData, renderMath } from "obsidian"
 import { SearchIndex } from "src"
-import { FuzzySearcher } from "src/search"
+import { Searcher } from "src/search"
 import { stripHTML } from "src/utils"
 
 export class AnkiIndex extends SearchIndex {
 
-    constructor(searcher: FuzzySearcher) {
+    constructor(searcher: Searcher) {
         super(searcher, "Anki Note")
         this.plugin.registerObsidianProtocolHandler("anki", (params: ObsidianProtocolData) => invoke("guiBrowse", {query: `nid:${params.id}`}))
     }

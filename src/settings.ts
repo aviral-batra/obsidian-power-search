@@ -23,7 +23,7 @@ export class PowerSearchSettingsTab extends PluginSettingTab {
 
 	constructor(app: App, plugin: PowerSearch) {
 		super(app, plugin);
-		this.plugin = plugin;
+		this.plugin = plugin;	
 	}
 
 	display(): void {
@@ -97,6 +97,7 @@ export class PowerSearchSettingsTab extends PluginSettingTab {
 						this.plugin.settings.indexes[i.type] = value;
 						await this.plugin.saveSettings();
 						await i.setupIndex()
+						this.plugin.getView().debouncedRedraw()
 					})
 				);
 			})

@@ -1,4 +1,4 @@
-import { ItemView, WorkspaceLeaf } from "obsidian";
+import { debounce, ItemView, WorkspaceLeaf } from "obsidian";
 import { SEARCH_RESULT_VIEW_TYPE } from "./constants";
 import PowerSearch from "./main";
 
@@ -6,10 +6,12 @@ import PowerSearch from "./main";
 export class SearchResultView extends ItemView {
     page: number
     plugin: PowerSearch;
+    debouncedRedraw: Function;
     
     constructor(leaf: WorkspaceLeaf, plugin: PowerSearch) {
         super(leaf);
         this.plugin = plugin
+        this.debouncedRedraw = debounce(() => this.redraw(), 1000)
     }
 
     async redraw() {
@@ -18,7 +20,6 @@ export class SearchResultView extends ItemView {
     }
     
     async _redraw(): Promise<void> {
-
 
         let arrowEl = createDiv({cls: "power-search-arrow-bar"})
         let leftArrow = arrowEl.createEl("a")
@@ -33,10 +34,10 @@ export class SearchResultView extends ItemView {
         rightArrow.innerHTML = " &raquo;"
         rightArrow.addEventListener("click", () => this.nextPage())
 
-
         let res = createDiv({ cls: 'power-search-results-children' })
         let idxs = this.plugin.search.indexes
-        if (!Object.keys(idxs).length) res.createDiv({cls: "power-search-results-type", text: "No indexes activated! They can be activated in the Power Search settings tab."});
+        if (!Object.keys(idxs).length) res.createDiv({cls: "power-search-results-type", text: "No indexes activated! They can be activated in the Power Search settings tab."})
+        else if (this.plugin.search.results.res.length == 0) res.createDiv({cls: "power-search-results-type", text: "No results found! Check for any errors in loading indexes (in a notice that popped up a few times or the console)"});
         for (let e of this.plugin.search.results.res) {
             let ch = res.createDiv({ cls: 'power-search-results-child' })
             let headEl = ch.createDiv({ cls: "power-search-results-type" })

@@ -1,6 +1,6 @@
 import { MarkdownRenderer, TAbstractFile, TFile, Vault } from "obsidian"
 import { SearchIndex } from "src"
-import { FuzzySearcher } from "src/search"
+import { Searcher } from "src/search"
 
 export class ObsidianIndex extends SearchIndex {
 
@@ -8,7 +8,7 @@ export class ObsidianIndex extends SearchIndex {
     modifiedFiles: TFile[]
     firstLoad: boolean;
 
-    constructor(searcher: FuzzySearcher) {
+    constructor(searcher: Searcher) {
         super(searcher, "Obsidian File") 
         this.fileTexts = {}
         this.modifiedFiles = []

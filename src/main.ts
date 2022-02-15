@@ -3,14 +3,14 @@ import { SearchIndex } from 'src';
 import { SEARCH_RESULT_VIEW_TYPE } from './constants';
 import { AnkiIndex } from './core/anki';
 import { ObsidianIndex } from './core/obs';
-import { FuzzySearcher } from './search';
+import { Searcher } from './search';
 import { DEFAULT_SETTINGS, PowerSearchSettings, PowerSearchSettingsTab } from './settings';
 import { SearchResultView } from './view';
 
 
 export default class PowerSearch extends Plugin {
 	settings: PowerSearchSettings;
-	search: FuzzySearcher;
+	search: Searcher;
 	indexes: SearchIndex[]
 
 	async onload() {
@@ -23,7 +23,7 @@ export default class PowerSearch extends Plugin {
 		);
 		this.addCommands()
 
-		this.search = new FuzzySearcher(this)
+		this.search = new Searcher(this)
 		this.app.workspace.onLayoutReady(() => this.initPlugin());
 	}
 
