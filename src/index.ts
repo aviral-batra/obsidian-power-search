@@ -30,13 +30,13 @@ export abstract class SearchIndex {
         this.notes = []
         this.errorShown = 0
         this.plugin.indexes.push(this)
-        this.setupIndex()
+        this.setupIndex(true)
     }
 
-    async setupIndex(): Promise<void> {
+    async setupIndex(load: boolean = false): Promise<void> {
         if (this.plugin.settings.indexes[this.type]) {
             this.searcher.addIndexIfNotAlreadyAdded(this)
-        } else await this.searcher.removeIndex(this)
+        } else if (!load) await this.searcher.removeIndex(this)
     }
 
     async loadNotes(): Promise<boolean> {

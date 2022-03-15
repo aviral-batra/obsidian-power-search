@@ -12,6 +12,7 @@ export class SearchResultView extends ItemView {
         super(leaf);
         this.plugin = plugin
         this.debouncedRedraw = debounce(() => this.redraw(), 1000)
+        this.redraw()
     }
 
     async redraw() {
@@ -37,7 +38,7 @@ export class SearchResultView extends ItemView {
         let res = createDiv({ cls: 'power-search-results-children' })
         let idxs = this.plugin.search.indexes
         if (!Object.keys(idxs).length) res.createDiv({cls: "power-search-results-type", text: "No indexes activated! They can be activated in the Power Search settings tab."})
-        else if (this.plugin.search.results.res.length == 0) res.createDiv({cls: "power-search-results-type", text: "No results found! Check for any errors in loading indexes (in a notice that popped up a few times or the console)"});
+        else if (this.plugin.search.results.res.length == 0) res.createDiv({cls: "power-search-results-type", text: "No results found! Start highlighting text/typing to try to find results or check for any errors in loading indexes (in a notice that pops up a few times or the console)"});
         for (let e of this.plugin.search.results.res) {
             let ch = res.createDiv({ cls: 'power-search-results-child' })
             let headEl = ch.createDiv({ cls: "power-search-results-type" })

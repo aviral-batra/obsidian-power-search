@@ -1,9 +1,9 @@
 {
     "id": "obsidian-power-search",
     "name": "Power Search",
-    "version": "0.0.12",
+    "version": "0.0.13",
     "minAppVersion": "0.13.0",
-    "description": "Searches Anki Notes based on current line",
+    "description": "Searches Obsidian and Anki Notes based on current line",
     "author": "Aviral Batra",
     "authorUrl": "",
     "isDesktopOnly": true
